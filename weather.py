@@ -5,59 +5,64 @@ import time
 import pprint
 
 
-def toF(kelvin):
-    Far = int((kelvin * (9 / 5)) - 459.67)
-    return Far
+class GetWeather:
+    Far = 0
 
+    def __init__(self, location):
+        self.location = location
 
-def getdata():
-    global E1
-    global window
-    town = E1.get()
+    def toF(self, kelvin):
+        self.Far = int((kelvin * (9 / 5)) - 459.67)
+        return self.Far
 
-    key = '1aeab2a0dfe6b0d9ef6a9a7fc8aedf04'
-    r = requests.get(
-        "http://api.openweathermap.org/data/2.5/weather?q=" + town + "&APPID=" + key)
-    fore = requests.get(
-        "http://api.openweathermap.org/data/2.5/forecast?q=" + town + ",1&APPID=" + key)
+    def getdata(self):
+        global E1
+        global window
+        town = E1.get()
+        print("The input data is ", town)
 
-    fore_resp = fore.text
-    fore_parsed = json.loads(fore_resp)
-    print(json.dumps(fore_parsed, indent=2, sort_keys=True))
-    days = ['Monday', 'Tuesday', 'Wednesday',
-            'Thursday', 'Friday', 'Saturday', 'Sunday']
+        key = '1aeab2a0dfe6b0d9ef6a9a7fc8aedf04'
+        r = requests.get(
+            "http://api.openweathermap.org/data/2.5/weather?q=" + town + "&APPID=" + key)
+        fore = requests.get(
+            "http://api.openweathermap.org/data/2.5/forecast?q=" + town + ",1&APPID=" + key)
 
-    forecast = Label(window, text="Forecast for " + town)
-    forecast.pack()
-    Current_Day = time.strftime("%A")
-    Day_Position = days.index(Current_Day)
+        fore_resp = fore.text
+        fore_parsed = json.loads(fore_resp)
+        #print(json.dumps(fore_parsed, indent=2, sort_keys=True))
+        days = ['Monday', 'Tuesday', 'Wednesday',
+                'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-    count = 0
-    while count != 5:
-        farenheit = fore_parsed['list'][Day_Position]['main']['temp']
-        test = toF(farenheit)
-        fart = Label(window, text=days[
-                     Day_Position] + ": " + str(test) + " with " + fore_parsed['list'][Day_Position]['weather'][0]['description'])
-        fart.pack()
-        if Day_Position == 6:
-            Day_Position = -1
-        Day_Position += 1
-        count += 1
+        forecast = Label(window, text="Forecast for " + town)
+        forecast.pack()
+        Current_Day = time.strftime("%A")
+        Day_Position = days.index(Current_Day)
 
-    response = r.text
-    parsed = json.loads(response)
-    #print(json.dumps(parsed, indent=2, sort_keys=True))
+        count = 0
+        while count != 5:
+            farenheit = fore_parsed['list'][Day_Position]['main']['temp']
+            test = self.toF(farenheit)
+            fart = Label(window, text=days[
+                         Day_Position] + ": " + str(test) + " with " + fore_parsed['list'][Day_Position]['weather'][0]['description'])
+            fart.pack()
+            if Day_Position == 6:
+                Day_Position = -1
+            Day_Position += 1
+            count += 1
 
-    norm = parsed['main']['temp']
-    faren = toF(norm)
+        response = r.text
+        parsed = json.loads(response)
 
-    top = Label(window, text=" \n\nCurrent weather for " + town)
-    top.pack()
-    temp = Label(window, text="Temperature: " + str(faren))
-    temp.pack()
-    weath = Label(window, text="Weather: " +
-                  parsed['weather'][0]['description'])
-    weath.pack()
+        norm = parsed['main']['temp']
+        faren = self.toF(norm)
+
+        top = Label(window, text=" \n\nCurrent weather for " + town)
+        top.pack()
+        temp = Label(window, text="Temperature: " + str(faren))
+        temp.pack()
+        weath = Label(window, text="Weather: " +
+                      parsed['weather'][0]['description'])
+        weath.pack()
 
 
 window = Tk()
@@ -67,9 +72,8 @@ city = Label(window, text="City")
 city.pack()
 E1 = Entry()
 E1.pack()
-
-
-Button(window, text='submit', command=getdata).pack()
+test = GetWeather(E1)  # instantiates the class
+Button(window, text='submit', command=test.getdata).pack()
 
 
 window.mainloop()
